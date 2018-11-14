@@ -144,17 +144,17 @@ int main(void)
 					if (numbytes == 1) { continue; }
 					buf[numbytes] = '\0'; 
 				}
+				if(strlen(buf)!=0)
+					comand_check = strtok(buf, " "); //split incoming string with spaces and take a first part  
 
-				comand_check = strtok(buf, " "); //split incoming string with spaces and take a first part  
-
-				if (strcmp(comand_check, "login") == 0) //if the first part is "login", then we need to check user's login in database
+				if (strcmp(comand_check, "login") == 0) //if the first part is "login", then we need to check user login in database
 				{
 					comand_check = strtok(NULL, " "); //take second part of incoming string which contains login itself
 					 
 					sprintf(query, "SELECT * from users where login='%s';",  comand_check); 
 					result = PQexec(connection, query);
 					int nrows = PQntuples(result); 
-					if (nrows == 0) //if we have no results - no such login in database
+					if (nrows == 0)//if we have no results - no such login in database
 						strcpy(output, "Code90: No such login in database! Try again.");
 					else
 					{
@@ -166,7 +166,7 @@ int main(void)
 						perror("error");
 
 				}
-				else if (strcmp(comand_check, "password") == 0) //if the first part is "password", then we need to check user's password in database
+				else if (strcmp(comand_check, "password") == 0)//if the first part is "password", then we need to check user password in database
 				{
 					if (strlen(login) != 0) // if user logged in
 					{
@@ -174,7 +174,7 @@ int main(void)
 						sprintf(query, "SELECT * from users where login='%s';", login);
 						result = PQexec(connection, query);
 
-						if (strcmp(comand_check, PQgetvalue(result, 0, 1)) == 0)//check password by compare it with password from our database
+						if (strcmp(comand_check, PQgetvalue(result, 0, 1)) == 0)//check password by compare it with password from out database
 						{
 							strcpy(password, PQgetvalue(result, 0, 1));
 							balance = atoi(PQgetvalue(result, 0, 2));
@@ -206,14 +206,38 @@ int main(void)
 						send(new_fd, "Code93: You have to log in first.", 100, 0);
 						continue;
 					}
-					if (balance <= 0)//check user balance greater than zero
+					if (balance <= 0)//check user balance
 					{
 						send(new_fd, "Code94: Your account balance is negative", 100, 0);
 						continue;
 					}
 					std::vector<std::string> all_numbers, all_actions;//two vectors. One is to store all numbers, second is to store all ariphmetical actions
 					comand_check = strtok(NULL, " ");
-					bool append = false;//as long we read string symbol by symbol we need to know do we need to add this new char to new vector item or we need to append this char to the previous item
+					printf("%d\n",strlen(comand_check));
+					#pragma region UserInputCheck
+					bool wrong_input=false,is_action=false;
+					for(int i=0;i<strlen(comand_check);i++)
+					{ 
+						if(comand_check[i]=='*'  || comand_check[i]=='+'  || comand_check[i]=='-'  || comand_check[i]=='/')
+						{
+							if(is_action)wrong_input=true;
+							is_action=true;
+						}
+						else is_action=false;
+
+						if((int(comand_check[i])>47 && int(comand_check[i])<58) ||comand_check[i]=='*'  || comand_check[i]=='+'  || comand_check[i]=='-'  || comand_check[i]=='/' )
+							continue;
+ 						else
+							wrong_input=true; 
+					}
+					if(wrong_input)
+					{
+						send(new_fd, "Code98: Your input is invalid", 100, 0);
+						continue;
+					}
+					#pragma endregion UserInputCheck
+
+					bool append = false;//as long we read string symbol by symbol we need to know do we need to add this new char to new vector item or we need to append this char to previous item
 
 					for (int i = 0; i < strlen(comand_check); i++)//read string char by char
 					{  
@@ -287,9 +311,9 @@ int main(void)
 					sprintf(query, "update users set balance=%d  where login='%s';", --balance, login); 
 					result = PQexec(connection, query);
 
-					//and register this calculation at the database
+					//and register this calculation in the database
 					float expression_result = std::stof(all_numbers.at(0));
-					sprintf(query, "insert into activities (login,activity_time,user_request,result) values ('%s',now(),'%s','%f');", login, comand_check, expression_result);
+					sprintf(query, "insert into activities (login,activiti_time,user_request,result) values ('%s',now(),'%s','%f');", login, comand_check, expression_result);
 					result = PQexec(connection, query);
 
 					sprintf(buf, "Code3: Answer is: %f. Your balance: %d", expression_result, balance);
