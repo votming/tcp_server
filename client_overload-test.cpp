@@ -34,7 +34,7 @@ void *get_in_addr(struct sockaddr *sa)
 int send_to_server(char str_to_send[],int sockfd)
 {
 strcpy(buf,str_to_send);
-fgets(buf, 100, stdin);
+//fgets(buf, 100, stdin);
 int numbytes;
     printf("client send: %s\n", buf);
 if(send(sockfd, strtok(buf,"\n"), MAXDATASIZE, 0)==-1)
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 
     freeaddrinfo(servinfo); // all done with this structure
 
-send_to_server("login admin",sockfd);
+send_to_server("login votming",sockfd);
 send_to_server("password 123",sockfd); 
 int result=1;
 while(result==1){  
