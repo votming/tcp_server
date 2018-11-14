@@ -5,7 +5,6 @@ Tables:
 "Create table activities (login varchar(100) not null, activity_time timestamp default NULL, user_request varchar(100) not null, result varchar(100) not null);"
 
 
-client.cpp - tcp-client with manual input
-client_overload-test.cpp - tcp-client which send to server 3 calculation commands without stopping while user's balance greater than zero
+client.cpp - tcp-client with manual input(mode 1) or machine input(mode 2)
 server.cpp - tcp-server source code
 makefile - file for server build

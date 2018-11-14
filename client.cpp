@@ -1,7 +1,7 @@
 /*
 ** client.c -- a stream socket client demo
 */
-
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -18,7 +18,7 @@
 
 #define MAXDATASIZE 100 // max number of bytes we can get at once 
 
-
+int mode=0;
 char buf[MAXDATASIZE];
 
 // get sockaddr, IPv4 or IPv6:
@@ -33,22 +33,29 @@ void *get_in_addr(struct sockaddr *sa)
 
 int send_to_server(char str_to_send[],int sockfd)
 {
+std::string buffer="";
+if(mode!=1)
 strcpy(buf,str_to_send);
-fgets(buf, 100, stdin);
-int numbytes;
-    printf("client send: %s\n", buf);
-if(send(sockfd, strtok(buf,"\n"), MAXDATASIZE, 0)==-1)
-                perror("error"); 
+else
+//fgets(buf,100,stdin)  ;
+{ 
+
+std::getline(std::cin,buffer);
+strcpy(buf,buffer.c_str()); 
+}
+int numbytes; 
+if(send(sockfd, buf/*strtok(buf,"\n")*/, MAXDATASIZE, 0)==-1)
+                perror("error2"); 
  
     memset(buf, 0, MAXDATASIZE);
     if ((numbytes = recv(sockfd, buf, MAXDATASIZE, 0)) == -1) {
-        perror("error");
+        perror("error1");
         exit(1);
     }
 
     buf[numbytes] = '\0';
 
-    printf("client received: '%s', %d\n",buf,numbytes);
+    printf("client received %s\n",buf);
     if(strcmp("Code94",strtok(buf,":"))==0)
 return -1;
 else return 1;
@@ -104,8 +111,11 @@ int main(int argc, char *argv[])
     printf("client: connecting to %s\n", s);
 
     freeaddrinfo(servinfo); // all done with this structure
-
-send_to_server("login admin",sockfd);
+std::string s1;
+printf("Select input mode: 1 - manual input, 2 - machine input(overload-test)");
+std::cin>>mode; 
+std::getline(std::cin,s1);
+send_to_server("login votming",sockfd);
 send_to_server("password 123",sockfd); 
 int result=1;
 while(result==1){  
