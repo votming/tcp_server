@@ -289,7 +289,7 @@ int main(void)
 
 					//and register this calculation in the database
 					float expression_result = std::stof(all_numbers.at(0));
-					sprintf(query, "insert into activities (login,activiti_time,user_request,result) values ('%s',now(),'%s','%f');", login, comand_check, expression_result);
+					sprintf(query, "insert into activities (login,activity_time,user_request,result) values ('%s',now(),'%s','%f');", login, comand_check, expression_result);
 					result = PQexec(connection, query);
 
 					sprintf(buf, "Code3: Answer is: %f. Your balance: %d", expression_result, balance);
